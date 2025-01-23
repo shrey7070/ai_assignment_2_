@@ -22,7 +22,7 @@ class ApplyMove:
         }
         
         # Split the string by the comma
-        value, direction = move.split(", ")
+        value, direction = move.split(",")
         direction = direction.strip()  # Ensure there are no extra spaces
         # clone the state for future use
         new_state = copy.deepcopy(self.state.grid)

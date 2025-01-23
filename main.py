@@ -49,7 +49,6 @@ def available_moves(file_path):
     except Exception as e:
         print(f"Error in available moves state: {e}")
 
-
 def apply_move(file_path, move):
     """
     Apply the move if possible and return the new state of the puzzle.
@@ -81,6 +80,12 @@ def identify_identical(file1, file2):
     except Exception as e:
         print(f"Error in identifying identical states: {e}")
 
+
+def standardize_input(input):
+    # Strip spaces and handle other formatting issues
+    input = input.replace(", ", ",").replace(" ,", ",")
+    return input
+
 def main():
     """
     Main function to handle all actions.
@@ -106,9 +111,10 @@ def main():
     elif action == "applyMove":
         if len(sys.argv) < 4:
             print("Error: Missing move for applyMove.")
-            print("Example: python3 main.py applyMove <file_path> (3, down)")
+            print("Example: python3 main.py applyMove <file_path> \"(3, down)\"")
             sys.exit(1)
         move = sys.argv[3]
+        move = standardize_input(move)
         apply_move(file_path, move)
     elif action == "compare":
         if len(sys.argv) < 4:

@@ -78,7 +78,6 @@ main() {
     local action=$1
     local file_name=$2
     local move=$3
-
     case $action in
         print) state_representation "$file_name" ;;
         done) done_state "$file_name" ;;
