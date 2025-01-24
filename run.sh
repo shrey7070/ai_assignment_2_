@@ -62,6 +62,18 @@ compare_states() {
     fi
 }
 
+# Function to normalize a state file
+normalize_state() {
+    local file_name=$1
+
+    # Check if the selected file exists
+    if [ -f "$file_name" ]; then
+        python3 main.py "norm" "$file_name"
+    else
+        echo "Error: File not found. Please ensure the file exists."
+    fi
+}
+
 # Main function to handle input arguments
 main() {
     if [ "$#" -lt 2 ]; then
@@ -72,6 +84,7 @@ main() {
         echo "  $0 availableMoves <file_name>"
         echo "  $0 applyMove <file_name> <move>"
         echo "  $0 compare <file1> <file2>"
+        echo "  $0 norm <file_name>"
         exit 1
     fi
 
@@ -98,6 +111,7 @@ main() {
             fi
             compare_states "$2" "$3"
             ;;
+        norm) normalize_state "$file_name" ;;  # Handle normalize action
         *)
             echo "Invalid action: $action"
             echo "Supported actions: print, done, availableMoves, applyMove"

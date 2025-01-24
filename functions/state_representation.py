@@ -39,4 +39,4 @@ class StateRepresentation:
         # Prints the grid representation of the state.
         print(f"Grid Dimensions: {self.rows} x {self.cols}\n")
         for row in state:
-            print(' '.join(row))
+            print(' '.join(str(item) for item in row))

@@ -3,6 +3,7 @@ from functions.identify_solution import IdentifySolution
 from functions.availableMoves import AvailableMoves
 from functions.applyMove import ApplyMove
 from functions.compareStates import CompareStates
+from functions.normalization import Normalization
 import sys
 
 
@@ -80,11 +81,23 @@ def identify_identical(file1, file2):
     except Exception as e:
         print(f"Error in identifying identical states: {e}")
 
-
 def standardize_input(input):
     # Strip spaces and handle other formatting issues
     input = input.replace(", ", ",").replace(" ,", ",")
     return input
+
+def normalize_input(file):
+    # read file and take instance of StateRepresentation
+    state_representation = StateRepresentation(file)
+    state_representation.read_file()
+    
+    # pass grid matrix to Normalization class
+    instance = Normalization(state_representation.grid)
+    
+    # get normalized matrix
+    normalized_matrix = instance.normalize_matrix() 
+    # print normalized matrix
+    state_representation.dynamic_print_state(normalized_matrix)
 
 def main():
     """
@@ -97,6 +110,7 @@ def main():
         print("python3 main.py availableMoves <file_path>")
         print("python3 main.py applyMove <file_path> <move>")
         print("python3 main.py compare <file_path1> <file_path2>")
+        print("python3 main.py norm <file_path1>")
         sys.exit(1)
 
     action = sys.argv[1]
@@ -124,6 +138,8 @@ def main():
         file_path1 = sys.argv[2]
         file_path2 = sys.argv[3]
         identify_identical(file_path1, file_path2)
+    elif action == "norm":
+        normalize_input(file_path)
     else:
         print(f"Invalid action: {action}")
         print("Supported actions: print, done, availableMoves, applyMove, compare")
