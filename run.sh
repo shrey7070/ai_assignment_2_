@@ -43,7 +43,7 @@ apply_move() {
 
     # Check if the selected file exists
     if [ -f "$file_name" ]; then
-        python3 main.py "applyMove" "$file_name" "$move"
+        python3 main.py "applyMove" "$file_name" $move
     else
         echo "Error: File not found. Please ensure the file exists."
     fi
@@ -74,6 +74,19 @@ normalize_state() {
     fi
 }
 
+# Function to random walk to the puzzle
+random_walk() {
+    local file_name=$1
+    local move=$2
+
+    # Check if the selected file exists and random moves n(int) is provided
+    if [ -f "$file_name" ] && [ -n $move ]; then
+        python3 main.py "random" "$file_name" "$move"
+    else
+        echo "Error: File or move not found. Please ensure the file exists."
+    fi
+}
+
 # Main function to handle input arguments
 main() {
     if [ "$#" -lt 2 ]; then
@@ -85,6 +98,7 @@ main() {
         echo "  $0 applyMove <file_name> <move>"
         echo "  $0 compare <file1> <file2>"
         echo "  $0 norm <file_name>"
+        echo "  $0 random <file_name> <random_int>"
         exit 1
     fi
 
@@ -112,9 +126,11 @@ main() {
             compare_states "$2" "$3"
             ;;
         norm) normalize_state "$file_name" ;;  # Handle normalize action
+        
+        random) random_walk "$file_name" "$move" ;;  # Handle random action
         *)
             echo "Invalid action: $action"
-            echo "Supported actions: print, done, availableMoves, applyMove"
+            echo "Supported actions: print, done, availableMoves, applyMove, norm, random"
             exit 1
             ;;
     esac

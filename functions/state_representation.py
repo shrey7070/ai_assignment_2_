@@ -11,9 +11,8 @@ class StateRepresentation:
             with open(self.fileName, 'r') as file:
                 self.content = file.readlines()
             
-            # Take dimensions from the first line (row , col)
             dimensions = self.content[0].strip().split(',')
-            self.rows, self.cols = int(dimensions[0]), int(dimensions[1])
+            self.cols, self.rows = int(dimensions[0]), int(dimensions[1])
 
             for line in self.content[1:]:
                 split_lines = line.strip().split(',')
@@ -30,13 +29,10 @@ class StateRepresentation:
     # Print State and Grid dimensions
     def print_state(self):
         # Prints the grid representation of the state.
-        print(f"Grid Dimensions: {self.rows} x {self.cols}\n")
         for row in self.grid:
             print(' '.join(row))
     
     # Print copied State and Grid for given state in parameter
     def dynamic_print_state(self, state):
-        # Prints the grid representation of the state.
-        print(f"Grid Dimensions: {self.rows} x {self.cols}\n")
         for row in state:
             print(' '.join(str(item) for item in row))

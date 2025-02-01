@@ -5,7 +5,7 @@ from functions.applyMove import ApplyMove
 from functions.compareStates import CompareStates
 from functions.normalization import Normalization
 import sys
-
+import random
 
 def print_state(file_path):
     """
@@ -13,7 +13,7 @@ def print_state(file_path):
     """
     try:
         # Create an instance of the StateRepresentation class
-        state = StateRepresentation(file_path)
+        state = StateRepresentation(fileName=file_path)
         state.read_file()  # Read the file
         state.print_state()  # Print the state
     except Exception as e:
@@ -24,10 +24,13 @@ def done_state(file_path):
     Return True if the puzzle is solved, else False.
     """
     try:
-        # Create an instance of the IdentifySolution class
-        instance = IdentifySolution(file_path)
-        instance.state.read_file()  # Read the file
-        is_puzzle_solved = instance.puzzleSolved()
+        stateInstance = StateRepresentation(fileName=file_path) # instance of StateRepresentation
+        stateInstance.read_file() #read the file
+        grid = stateInstance.grid
+        cols = stateInstance.cols
+        rows = stateInstance.rows
+        instance = IdentifySolution()
+        is_puzzle_solved = instance.puzzleSolved(grid,rows,cols)
         print(is_puzzle_solved)
     except Exception as e:
         print(f"Error in done state: {e}")
@@ -37,12 +40,16 @@ def available_moves(file_path):
     Return all the moves available in the puzzle.
     """
     try:
+        stateInstance = StateRepresentation(fileName=file_path) # instance of StateRepresentation
+        stateInstance.read_file() #read the file
+        grid = stateInstance.grid
+        cols = stateInstance.cols
+        rows = stateInstance.rows
         # Create an instance of the AvailableMoves class
-        instance = AvailableMoves(file_path)
-        instance.state.read_file()  # Read the file
-        moves = instance.get_available_moves()  # Get available moves
+        instance = AvailableMoves()
+        
+        moves = instance.get_available_moves(grid, rows, cols)  # Get available moves
         if moves:
-            print("Available Moves:")
             for move in moves:
                 print(move)
         else:
@@ -56,14 +63,18 @@ def apply_move(file_path, move):
     """
     try:
         # Create an instance of the ApplyMove class
-        instance = ApplyMove(file_path, move)
-        instance.apply_move()  # Apply the move
+        state_instance = StateRepresentation(file_path)  # Instance of StateRepresentation
+        state_instance.read_file()  # Read the file
+        instance = ApplyMove(state_instance.grid,move,state_instance.rows,state_instance.cols)
+        applied_move_state=instance.apply_move()  # Apply the move
+        
+        state_instance.dynamic_print_state(applied_move_state)
     except Exception as e:
         print(f"Error in applying move: {e}")
 
 def identify_identical(file1, file2):
     """
-    Return True if the two states are identical, else False.
+    Return True if the two states are identical/same, else False.
     """
     try:
         # Create an instance of the StateRepresentation class for both states
@@ -88,7 +99,7 @@ def standardize_input(input):
 
 def normalize_input(file):
     # read file and take instance of StateRepresentation
-    state_representation = StateRepresentation(file)
+    state_representation = StateRepresentation(fileName=file)
     state_representation.read_file()
     
     # pass grid matrix to Normalization class
@@ -98,6 +109,57 @@ def normalize_input(file):
     normalized_matrix = instance.normalize_matrix() 
     # print normalized matrix
     state_representation.dynamic_print_state(normalized_matrix)
+
+def random_walk(file, number):
+    stateInstance = StateRepresentation(fileName=file) # instance of StateRepresentation
+    stateInstance.read_file() #read the file
+    
+    # Create an instance of the AvailableMoves class
+    instance = AvailableMoves()
+    grid = stateInstance.grid
+    cols = stateInstance.cols
+    rows = stateInstance.rows
+
+    # Initial State of grid
+    print("\nInitial State:")
+    stateInstance.dynamic_print_state(grid)
+
+    # Perform Random Walk
+    for i in range(int(number)):
+        print(f"\nMove {i + 1}:")
+        
+        # Step 1: generate all moves from current state
+        moves = instance.get_available_moves(grid,rows,cols)  # Get available moves
+        if not moves:
+            print("No available moves.")
+            break
+
+        # Step 2: Select One at Random
+        move = generate_random_move(moves)
+        print(f"Random Move Selected: {move}")
+        
+        # Step 3: Execute randomaly selected move
+        apply_move_instance = ApplyMove(grid=grid, move=str(move),rows=rows,cols=cols)
+        grid = apply_move_instance.apply_move()  # Update grid with the new state
+
+        # Step 4: Normalize result grid
+        normalize_instance = Normalization(grid)
+        grid = normalize_instance.normalize_matrix()  # Normalize the grid
+
+        # Step 5: Identify if puzzle is solved
+        identify_instance = IdentifySolution()
+        is_puzzle_solved = identify_instance.puzzleSolved(grid,rows,cols)
+
+        # Step 6: Print the current state
+        stateInstance.dynamic_print_state(grid)
+        
+        if(is_puzzle_solved):
+            print("Puzzle Solved!")
+            break
+
+# select random move from moves.
+def generate_random_move(moves):
+    return random.choice(moves)
 
 def main():
     """
@@ -111,6 +173,7 @@ def main():
         print("python3 main.py applyMove <file_path> <move>")
         print("python3 main.py compare <file_path1> <file_path2>")
         print("python3 main.py norm <file_path1>")
+        print("python3 main.py random <file_path1> <Number>")
         sys.exit(1)
 
     action = sys.argv[1]
@@ -140,6 +203,9 @@ def main():
         identify_identical(file_path1, file_path2)
     elif action == "norm":
         normalize_input(file_path)
+    elif action == "random":
+        number = sys.argv[3]
+        random_walk(file_path,number)
     else:
         print(f"Invalid action: {action}")
         print("Supported actions: print, done, availableMoves, applyMove, compare")

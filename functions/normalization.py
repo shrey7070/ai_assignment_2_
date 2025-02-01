@@ -1,30 +1,16 @@
-
 class Normalization:
     def __init__(self, matrix):
         self.matrix = matrix
 
-    def swap_indices(self, idx1, idx2):
-        """
-        Swap two indices in the matrix.
-        """
+    def swap_indexes(self, index1, index2):
         for i in range(len(self.matrix)):
             for j in range(len(self.matrix[i])):
-                # print("================================")
-                # print(self.matrix[i][j] == 12)
-                # print(idx1 == 12)
-                # print("================================")
-                if self.matrix[i][j] == str(idx1):
-                    self.matrix[i][j] = str(idx2)
-                elif self.matrix[i][j] == str(idx2):
-                    self.matrix[i][j] = str(idx1)
+                if self.matrix[i][j] == str(index1):
+                    self.matrix[i][j] = str(index2)
+                elif self.matrix[i][j] == str(index2):
+                    self.matrix[i][j] = str(index1)
     def normalize_matrix(self):
-        """
-        Normalize the matrix so that each brick uses the smallest possible index.
-        """
-        # print("Initial Matrix:")
-        # for row in self.matrix:
-        #     print(' '.join(map(str, row)))
-        next_idx = 3  # 1(wall) and 2(target brick) are reserved
+        next_idx = 3  # 1(wall) and 2(target block) are reserved
         for i in range(len(self.matrix)):
             for j in range(len(self.matrix[i])):
                 try:
@@ -35,7 +21,7 @@ class Normalization:
                     next_idx += 1
                 else:
                     if current_value > next_idx: 
-                        self.swap_indices(current_value,next_idx)
+                        self.swap_indexes(current_value,next_idx)
                         next_idx += 1
 
         return self.matrix

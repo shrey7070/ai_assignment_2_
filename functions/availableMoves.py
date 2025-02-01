@@ -1,48 +1,65 @@
-import sys
 from functions.state_representation import StateRepresentation
+from helper import DIRECTIONS
 
 class AvailableMoves:
-    file_path = sys.argv[1]
-    def __init__(self, file_path):
-        self.state = StateRepresentation(file_path) # instance of StateRepresentation
-        self.state.read_file() #read the file
-    
-    # check available moves
-    def get_available_moves(self):
-        '''
-        Returns a dict of available moves for the puzzle.
-        '''
+    def get_available_moves(self, grid, rows, cols):
         available_moves = []
-        ''' 
-        down: (1,0) = Move 1 row down, no change in the column.
-        up: (-1,0) = Move 1 row up, no change in the column.
-        right: (0,1) = Move 1 col right, no change in the row.
-        left: (0,-1) = Move 1 col left, no change in the row.
-        '''
-        directions = {
-            "down": (1, 0),
-            "up": (-1, 0),
-            "right": (0, 1),
-            "left": (0, -1),
-        }
+        visited = set()  # To track visited block
 
-        for row in range(self.state.rows):
-            for col in range(self.state.cols):
-                ''' 
-                1 is wall (not movable), 0 is empty, -1 is goal state.
-                so we will skip moving them and focus on other values.
-                '''
-                if self.state.grid[row][col] == "" or self.state.grid[row][col] == "1" or self.state.grid[row][col] == "0":
+        def get_connected_blocks(r, c, value):
+            """
+            Perform DFS to find all connected block with the same value.
+            """
+            stack = [(r, c)]
+            connected = set()
+            while stack:
+                x, y = stack.pop()
+                if (x, y) not in visited and 0 <= x < rows and 0 <= y < cols and grid[x][y] == value:
+                    visited.add((x, y))
+                    connected.add((x, y))
+                    for dx, dy in [(0, 1), (1, 0), (0, -1), (-1, 0)]:
+                        stack.append((x + dx, y + dy))
+            return connected
+
+        for row in range(rows):
+            for col in range(cols):
+                current_value = grid[row][col]
+
+                # Skip if it's already visited or not a movable block
+                if (row, col) in visited or current_value in ['', '1', '0', '-1']:
                     continue
-                # Check all possible directions (up, down, left, right)
-                for direction, (row_offset, col_offset) in directions.items():
-                    # Calculate the new position after moving in this direction
-                    new_row = row + row_offset
-                    new_col = col + col_offset
-                    '''
-                    if new_row and new_col indexes values are equal to 0 then move or -1
-                    '''
-                    if 0 <= new_row < self.state.rows and 0 <= new_col < self.state.cols:
-                        if self.state.grid[new_row][new_col] in ["0", "-1"]:
-                            available_moves.append((int(self.state.grid[row][col]), direction))
+
+                # Get all connected blocks for the current value
+                connected_blocks = get_connected_blocks(row, col, current_value)
+
+                # Check all possible moves for the entire block
+                for direction, (row_offset, col_offset) in DIRECTIONS.items():
+                    can_move = True
+                    for r, c in connected_blocks:
+                        new_row = r + row_offset
+                        new_col = c + col_offset
+                        
+                        # Check if the new position is within bounds
+                        if not (0 <= new_row < rows and 0 <= new_col < cols):
+                            can_move = False
+                            break
+
+                        new_value = grid[new_row][new_col]
+                        # Check if the new cell is part of the connected_blocks or the value is allowed
+                        if current_value == "2":
+                            if (new_value not in ["0", "-1"] and 
+                                (new_row, new_col) not in connected_blocks):
+                                can_move = False
+                                break
+                        else:
+                            if (new_value != "0" and 
+                                (new_row, new_col) not in connected_blocks):
+                                can_move = False
+                                break
+
+                    # If the entire block can move, add the move
+                    if can_move:
+                        move = f"({int(current_value)},{direction})"
+                        if move not in available_moves:
+                            available_moves.append(move)
         return available_moves
