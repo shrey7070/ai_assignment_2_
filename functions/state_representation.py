@@ -29,10 +29,13 @@ class StateRepresentation:
     # Print State and Grid dimensions
     def print_state(self):
         # Prints the grid representation of the state.
+        print(self.cols,',',self.rows)
         for row in self.grid:
             print(' '.join(row))
     
     # Print copied State and Grid for given state in parameter
     def dynamic_print_state(self, state):
+        # Prints the grid representation of the state.
+        print(self.cols,',',self.rows)
         for row in state:
             print(' '.join(str(item) for item in row))
